@@ -92,14 +92,14 @@ RUN apt-get -y clean \
 	&& rm -rf /var/lib/apt/lists/*
 
 # default publichost, you'll need to set this for passive support
-ENV PUBLICHOST localhost
+ENV PURE_FTPD_PASSIVE_IP localhost
 
 # couple available volumes you may want to use
 VOLUME ["/home/ftp", "/etc/pure-ftpd/passwd", "/etc/pure-ftpd/puredb"]
 
 # startup
 CMD /run.sh \
-	--forcepassiveip $PUBLIC_IP \
+	--forcepassiveip=$PURE_FTPD_PASSIVE_IP \
 	--createhomedir \
 	--noanonymous \
 	--nochmod

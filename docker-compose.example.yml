@@ -8,15 +8,18 @@ services:
     container_name: pure-ftpd
     restart: 'no'
     environment:
-      PUBLIC_IP: "${PUBLIC_IP_ADDRESS}"
+      PURE_FTPD_PASSIVE_IP: "${PURE_FTPD_PASSIVE_IP}"
+# E.g. PURE_FTPD_PASSIVE_PORTS=n:m in .env
+      PURE_FTPD_PASSIVE_PORTS: "${PURE_FTPD_PASSIVE_PORTS}"
       PURE_FTPD_CUSTOM_FLAGS: "${PURE_FTPD_CUSTOM_FLAGS}"
 # Uncomment if creation of ftp user is wanted
 #      FTP_USER_NAME: ftp
 #      FTP_USER_PASS: ftp-user-password
 #      FTP_USER_HOME: /home/ftp
     ports:
-      - "${BIND_PORT}:${BIND_PORT}"
-      - "${PASSIVE_PORTS}:${PASSIVE_PORTS}"
+      - "${PURE_FTPD_BIND_PORT}:${PURE_FTPD_BIND_PORT}"
+# E.g PURE_FTPD_PASSIVE_PORT_RANGE=n-m in .env
+      - "${PURE_FTPD_PASSIVE_PORT_RANGE}:${PURE_FTPD_PASSIVE_PORT_RANGE}"
     volumes:
 # Uncomment for a pre-existing passwd file
 #      - type: bind

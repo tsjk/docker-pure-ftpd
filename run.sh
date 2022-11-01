@@ -114,43 +114,43 @@ $FTP_USER_PASS" > "$PWD_FILE"
     echo "Created user"
 fi
 
-# Set a default value to the env var FTP_PASSIVE_PORTS
-if [ -z "$FTP_PASSIVE_PORTS" ]
+# Set a default value to the env var PURE_FTPD_PASSIVE_PORTS
+if [ -z "$PURE_FTPD_PASSIVE_PORTS" ]
 then
-    FTP_PASSIVE_PORTS=38801:38864
+    PURE_FTPD_PASSIVE_PORTS=38801:38864
 fi
 
 # Set passive port range in pure-ftpd options if not already existent
 if [[ $PURE_FTPD_FLAGS != *" -p "* ]] && [[ $PURE_FTPD_FLAGS != *"--passiveportrange="* ]]
 then
-    echo "Setting default port range to: $FTP_PASSIVE_PORTS"
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --passiveportrange=$FTP_PASSIVE_PORTS"
+    echo "Setting default port range to: $PURE_FTPD_PASSIVE_PORTS"
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --passiveportrange=$PURE_FTPD_PASSIVE_PORTS"
 fi
 
-# Set a default value to the env var FTP_MAX_CLIENTS
-if [ -z "$FTP_MAX_CLIENTS" ]
+# Set a default value to the env var PURE_FTPD_MAX_CLIENTS
+if [ -z "$PURE_FTPD_MAX_CLIENTS" ]
 then
-    FTP_MAX_CLIENTS=16
+    PURE_FTPD_MAX_CLIENTS=16
 fi
 
 # Set max clients in pure-ftpd options if not already existent
 if [[ $PURE_FTPD_FLAGS != *" -c "* ]] && [[ $PURE_FTPD_FLAGS != *"--maxclientsnumber="* ]]
 then
-    echo "Setting default max clients to: $FTP_MAX_CLIENTS"
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --maxclientsnumber=$FTP_MAX_CLIENTS"
+    echo "Setting default max clients to: $PURE_FTPD_MAX_CLIENTS"
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --maxclientsnumber=$PURE_FTPD_MAX_CLIENTS"
 fi
 
-# Set a default value to the env var FTP_MAX_LOGINS (per user)
-if [ -z "$FTP_MAX_LOGINS" ]
+# Set a default value to the env var PURE_FTPD_MAX_LOGINS (per user)
+if [ -z "$PURE_FTPD_MAX_LOGINS" ]
 then
-    FTP_MAX_LOGINS=3:$FTP_MAX_CLIENTS
+    PURE_FTPD_MAX_LOGINS=3:$PURE_FTPD_MAX_CLIENTS
 fi
 
 # Set max connections per user in pure-ftpd options if not already existent
 if [[ $PURE_FTPD_FLAGS != *" -y "* ]] && [[ $PURE_FTPD_FLAGS != *"--peruserlimits="* ]]
 then
-    echo "Setting default max connections per user to: $FTP_MAX_LOGINS"
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --peruserlimits=$FTP_MAX_LOGINS"
+    echo "Setting default max connections per user to: $PURE_FTPD_MAX_LOGINS"
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --peruserlimits=$PURE_FTPD_MAX_LOGINS"
 fi
 
 # let users know what flags we've ended with (useful for debug)
