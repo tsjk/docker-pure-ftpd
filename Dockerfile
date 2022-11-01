@@ -99,9 +99,9 @@ VOLUME ["/home/ftp", "/etc/pure-ftpd/passwd", "/etc/pure-ftpd/puredb"]
 
 # startup
 CMD /run.sh \
-	--forcepassiveip=$PURE_FTPD_PASSIVE_IP \
 	--createhomedir \
 	--noanonymous \
-	--nochmod
+	--nochmod \
+	--forcepassiveip=$PURE_FTPD_PASSIVE_IP
 
 EXPOSE 21 38801-38864
