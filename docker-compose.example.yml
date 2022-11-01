@@ -20,15 +20,15 @@ services:
     volumes:
 # Uncomment for a pre-existing passwd file
 #      - type: bind
-#        source: pure-ftpd/passwd
+#        source: conf/passwd
 #        target: /etc/pure-ftpd/passwd
 # Uncomment for a pre-existing puredb file
 #      - type: bind
-#        source: pure-ftpd/puredb
+#        source: conf/puredb
 #        target: /etc/pure-ftpd/puredb
 # Uncomment for a pre-existing certificate file and add e.g. '--certfile=/etc/pure-ftpd/ssl/pure-ftpd.pem' to PURE_FTPD_CUSTOM_FLAGS in .env
 #      - type: bind
-#        source: pure-ftpd/ssl
+#        source: conf/ssl
 #        target: /etc/pure-ftp/ssl
 
 # Additional volumes

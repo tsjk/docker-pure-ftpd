@@ -1,6 +1,4 @@
 *.swp
 /.env
 /docker-compose.yml
-/passwd/
-/puredb/
-/ssl/
+/conf/
