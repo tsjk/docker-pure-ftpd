@@ -8,17 +8,23 @@ PURE_FTPD_FLAGS=" $@ $ADDED_FLAGS "
 if [[ "$PURE_FTPD_FLAGS" == *" -d "* ]] || [[ "$PURE_FTPD_FLAGS" == *"--verboselog"* ]]
 then
     echo "Log enabled, see /var/log/messages"
-    rsyslogd
     rm -rf /var/log/pure-ftpd/pureftpd.log
+    rsyslogd
     tail --pid $$ -F /var/log/pure-ftpd/pureftpd.log &
 fi
 
 PASSWD_FILE="/etc/pure-ftpd/passwd/pureftpd.passwd"
+DB_FILE="/etc/pure-ftpd/puredb/pureftpd.pdb"
 
 # Load in any existing db from volume store
-if [ -e /etc/pure-ftpd/passwd/pureftpd.passwd ]
+if [ -e "$PASSWD_FILE" ] && [ ! -s "$DB_FILE" ]
 then
-    pure-pw mkdb /etc/pure-ftpd/pureftpd.pdb -f "$PASSWD_FILE"
+    pure-pw mkdb "$DB_FILE" -f "$PASSWD_FILE"
+fi
+
+if [ -s "$DB_FILE" ]
+then
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --login=puredb:\"$DB_FILE\""
 fi
 
 # detect if using TLS (from volumed in file) but no flag set, set one
@@ -55,7 +61,7 @@ fi
 # Add user
 if [ ! -z "$FTP_USER_NAME" ] && [ ! -z "$FTP_USER_PASS" ] && [ ! -z "$FTP_USER_HOME" ]
 then
-    echo "Creating user..."
+    echo "Creating user"
 
     # make sure the home folder exists
     mkdir -p "$FTP_USER_HOME"
@@ -64,14 +70,14 @@ then
     PWD_FILE="$(mktemp)"
     echo "$FTP_USER_PASS
 $FTP_USER_PASS" > "$PWD_FILE"
-    
+
     # Set uid/gid
     PURE_PW_ADD_FLAGS=""
     if [ ! -z "$FTP_USER_UID" ]
     then
         PURE_PW_ADD_FLAGS="$PURE_PW_ADD_FLAGS -u $FTP_USER_UID"
     else
-        PURE_PW_ADD_FLAGS="$PURE_PW_ADD_FLAGS -u ftpuser"
+        PURE_PW_ADD_FLAGS="$PURE_PW_ADD_FLAGS -u ftp"
     fi
     if [ ! -z "$FTP_USER_GID" ]
     then
@@ -83,7 +89,7 @@ $FTP_USER_PASS" > "$PWD_FILE"
     if [ ! -z "$FTP_USER_HOME_PERMISSION" ]
     then
         chmod "$FTP_USER_HOME_PERMISSION" "$FTP_USER_HOME"
-        echo " root user give $FTP_USER_NAME ftp user at $FTP_USER_HOME directory has $FTP_USER_HOME_PERMISSION permission"
+        echo " root user give \"$FTP_USER_NAME\" ftp user at $FTP_USER_HOME directory has $FTP_USER_HOME_PERMISSION permission"
     fi
 
     if [ ! -z "$FTP_USER_UID" ]
@@ -91,23 +97,24 @@ $FTP_USER_PASS" > "$PWD_FILE"
         if ! [[ $(ls -ldn $FTP_USER_HOME | awk '{print $3}') = $FTP_USER_UID ]]
         then
             chown $FTP_USER_UID "$FTP_USER_HOME"
-            echo " root user give $FTP_USER_HOME directory $FTP_USER_UID owner"
+            echo " root user give $FTP_USER_HOME directory \"$FTP_USER_UID\" owner"
         fi
     else
-        if ! [[ $(ls -ld $FTP_USER_HOME | awk '{print $3}') = 'ftpuser' ]]
+        if ! [[ $(ls -ld $FTP_USER_HOME | awk '{print $3}') = 'ftp' ]]
         then
             chown ftpuser "$FTP_USER_HOME"
-            echo " root user give $FTP_USER_HOME directory ftpuser owner"
+            echo " root user give $FTP_USER_HOME directory \"ftp\" owner"
         fi
     fi
 
     rm "$PWD_FILE"
+    echo "Created user"
 fi
 
 # Set a default value to the env var FTP_PASSIVE_PORTS
 if [ -z "$FTP_PASSIVE_PORTS" ]
 then
-    FTP_PASSIVE_PORTS=30000:30009
+    FTP_PASSIVE_PORTS=38801:38864
 fi
 
 # Set passive port range in pure-ftpd options if not already existent
@@ -120,7 +127,7 @@ fi
 # Set a default value to the env var FTP_MAX_CLIENTS
 if [ -z "$FTP_MAX_CLIENTS" ]
 then
-    FTP_MAX_CLIENTS=5
+    FTP_MAX_CLIENTS=16
 fi
 
 # Set max clients in pure-ftpd options if not already existent
@@ -130,17 +137,17 @@ then
     PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS -c $FTP_MAX_CLIENTS"
 fi
 
-# Set a default value to the env var FTP_MAX_CONNECTIONS
-if [ -z "$FTP_MAX_CONNECTIONS" ]
+# Set a default value to the env var FTP_MAX_LOGINS (per user)
+if [ -z "$FTP_MAX_LOGINS" ]
 then
-    FTP_MAX_CONNECTIONS=5
+    FTP_MAX_LOGINS=3:$FTP_MAX_CLIENTS
 fi
 
-# Set max connections per ip in pure-ftpd options if not already existent
-if [[ $PURE_FTPD_FLAGS != *" -C "* ]]
+# Set max connections per user in pure-ftpd options if not already existent
+if [[ $PURE_FTPD_FLAGS != *" -y "* ]]
 then
-    echo "Setting default max connections per ip to: $FTP_MAX_CONNECTIONS"
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS -C $FTP_MAX_CONNECTIONS"
+    echo "Setting default max connections per ip to: $FTP_MAX_LOGINS"
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS -y $FTP_MAX_LOGINS"
 fi
 
 # let users know what flags we've ended with (useful for debug)
