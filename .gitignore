@@ -1,0 +1,5 @@
+*.swp
+/docker-compose.yml
+/passwd/
+/puredb/
+/ssl/
