@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # build up flags passed to this file on run + env flag for additional flags
-# e.g. -e "ADDED_FLAGS=--tls=2"
-PURE_FTPD_FLAGS=" $@ $ADDED_FLAGS "
+# e.g. docker run ... -e "PURE_FTPD_CUSTOM_FLAGS=--tls=2" ...
+PURE_FTPD_FLAGS="$@"
+[ -z "$PURE_FTPD_CUSTOM_FLAGS" ] || \
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS $PURE_FTPD_CUSTOM_FLAGS"
 
 # start rsyslog
-if [[ "$PURE_FTPD_FLAGS" == *" -d "* ]] || [[ "$PURE_FTPD_FLAGS" == *"--verboselog"* ]]
+if [[ "$PURE_FTPD_FLAGS" == *" -d"* ]] || [[ "$PURE_FTPD_FLAGS" == *"--verboselog"* ]]
 then
     echo "Log enabled, see /var/log/messages"
     rm -rf /var/log/pure-ftpd/pureftpd.log
@@ -24,14 +26,14 @@ fi
 
 if [ -s "$DB_FILE" ] && [[ "$PURE_FTPD_FLAGS" != *"--login=puredb:"* ]] && [[ "$PURE_FTPD_FLAGS" != *" -l puredb:"* ]]
 then
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --login=puredb:\"$DB_FILE\" "
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --login=puredb:\"$DB_FILE\""
 fi
 
 # detect if using TLS (from volumed in file) but no flag set, set one
 if [ -e /etc/ssl/private/pure-ftpd.pem ] && [[ "$PURE_FTPD_FLAGS" != *"--tls="* ]] && [[ "$PURE_FTPD_FLAGS" != *"-Y "* ]]
 then
     echo "TLS Enabled"
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --tls=1 "
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --tls=1"
 fi
 
 # If TLS flag is set and cert and key are given are given as two files, merge them into one cert
