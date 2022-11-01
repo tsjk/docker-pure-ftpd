@@ -1,0 +1,35 @@
+version: '3'
+
+# Assumes the existence of an .env file
+
+services:
+  ftpd_server:
+    image: local/pure-ftpd
+    container_name: pure-ftpd
+    restart: 'no'
+    environment:
+      PUBLIC_IP: "${PUBLIC_IP_ADDRESS}"
+      PURE_FTPD_CUSTOM_FLAGS: "${PURE_FTPD_CUSTOM_FLAGS}"
+# Uncomment if creation of ftp user is wanted
+#      FTP_USER_NAME: ftp
+#      FTP_USER_PASS: ftp-user-password
+#      FTP_USER_HOME: /home/ftp
+    ports:
+      - "${BIND_PORT}:${BIND_PORT}"
+      - "${PASSIVE_PORTS}:${PASSIVE_PORTS}"
+    volumes:
+# Uncomment for a pre-existing passwd file
+#      - type: bind
+#        source: pure-ftpd/passwd
+#        target: /etc/pure-ftpd/passwd
+# Uncomment for a pre-existing puredb file
+#      - type: bind
+#        source: pure-ftpd/puredb
+#        target: /etc/pure-ftpd/puredb
+# Uncomment for a pre-existing certificate file and add e.g. '--certfile=/etc/pure-ftpd/ssl/pure-ftpd.pem' to PURE_FTPD_CUSTOM_FLAGS in .env
+#      - type: bind
+#        source: pure-ftpd/ssl
+#        target: /etc/pure-ftp/ssl
+
+# Additional volumes
+#      - /folder_on_disk/data:/home/ftp:rw
