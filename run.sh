@@ -22,27 +22,28 @@ then
     pure-pw mkdb "$DB_FILE" -f "$PASSWD_FILE"
 fi
 
-if [ -s "$DB_FILE" ]
+if [ -s "$DB_FILE" ] && [[ "$PURE_FTPD_FLAGS" != *"--login=puredb:"* ]] && [[ "$PURE_FTPD_FLAGS" != *" -l puredb:"* ]]
 then
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --login=puredb:\"$DB_FILE\""
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --login=puredb:\"$DB_FILE\" "
 fi
 
 # detect if using TLS (from volumed in file) but no flag set, set one
-if [ -e /etc/ssl/private/pure-ftpd.pem ] && [[ "$PURE_FTPD_FLAGS" != *"--tls"* ]] && [[ "$PURE_FTPD_FLAGS" != *"-Y"* ]]
+if [ -e /etc/ssl/private/pure-ftpd.pem ] && [[ "$PURE_FTPD_FLAGS" != *"--tls="* ]] && [[ "$PURE_FTPD_FLAGS" != *"-Y "* ]]
 then
     echo "TLS Enabled"
     PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --tls=1 "
 fi
 
 # If TLS flag is set and cert and key are given are given as two files, merge them into one cert
-if [ -e /etc/ssl/private/pure-ftpd-cert.pem ] && [ -e /etc/ssl/private/pure-ftpd-key.pem ] && [[ "$PURE_FTPD_FLAGS" == *"--tls"* ]]
+if [ -e /etc/ssl/private/pure-ftpd-cert.pem ] && [ -e /etc/ssl/private/pure-ftpd-key.pem ] && [[ "$PURE_FTPD_FLAGS" == *"--tls="* || "$PURE_FTPD_FLAGS" != *"-Y "* ]]
 then
     echo "Merging certificate and key"
     cat /etc/ssl/private/pure-ftpd-cert.pem /etc/ssl/private/pure-ftpd-key.pem > /etc/ssl/private/pure-ftpd.pem
 fi
 
 # If TLS flag is set and no certificate exists, generate it
-if [ ! -e /etc/ssl/private/pure-ftpd.pem ] && [[ "$PURE_FTPD_FLAGS" == *"--tls"* ]] && [ ! -z "$TLS_CN" ] && [ ! -z "$TLS_ORG" ] && [ ! -z "$TLS_C" ]
+if [ ! -e /etc/ssl/private/pure-ftpd.pem ] && [[ "$PURE_FTPD_FLAGS" == *"--tls="* || "$PURE_FTPD_FLAGS" != *"-Y "* ]] && \
+   [ ! -z "$TLS_CN" ] && [ ! -z "$TLS_ORG" ] && [ ! -z "$TLS_C" ]
 then
     echo "Generating self-signed certificate"
     mkdir -p /etc/ssl/private
@@ -118,10 +119,10 @@ then
 fi
 
 # Set passive port range in pure-ftpd options if not already existent
-if [[ $PURE_FTPD_FLAGS != *" -p "* ]]
+if [[ $PURE_FTPD_FLAGS != *" -p "* ]] && [[ $PURE_FTPD_FLAGS != *"--passiveportrange="* ]]
 then
     echo "Setting default port range to: $FTP_PASSIVE_PORTS"
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS -p $FTP_PASSIVE_PORTS"
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --passiveportrange=$FTP_PASSIVE_PORTS"
 fi
 
 # Set a default value to the env var FTP_MAX_CLIENTS
@@ -131,10 +132,10 @@ then
 fi
 
 # Set max clients in pure-ftpd options if not already existent
-if [[ $PURE_FTPD_FLAGS != *" -c "* ]]
+if [[ $PURE_FTPD_FLAGS != *" -c "* ]] && [[ $PURE_FTPD_FLAGS != *"--maxclientsnumber="* ]]
 then
     echo "Setting default max clients to: $FTP_MAX_CLIENTS"
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS -c $FTP_MAX_CLIENTS"
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --maxclientsnumber=$FTP_MAX_CLIENTS"
 fi
 
 # Set a default value to the env var FTP_MAX_LOGINS (per user)
@@ -144,10 +145,10 @@ then
 fi
 
 # Set max connections per user in pure-ftpd options if not already existent
-if [[ $PURE_FTPD_FLAGS != *" -y "* ]]
+if [[ $PURE_FTPD_FLAGS != *" -y "* ]] && [[ $PURE_FTPD_FLAGS != *"--peruserlimits="* ]]
 then
-    echo "Setting default max connections per ip to: $FTP_MAX_LOGINS"
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS -y $FTP_MAX_LOGINS"
+    echo "Setting default max connections per user to: $FTP_MAX_LOGINS"
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --peruserlimits=$FTP_MAX_LOGINS"
 fi
 
 # let users know what flags we've ended with (useful for debug)

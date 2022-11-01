@@ -98,6 +98,10 @@ ENV PUBLICHOST localhost
 VOLUME ["/home/ftp", "/etc/pure-ftpd/passwd", "/etc/pure-ftpd/puredb"]
 
 # startup
-CMD /run.sh -l puredb:/etc/pure-ftpd/pureftpd.pdb -E -j -R -P $PUBLICHOST
+CMD /run.sh \
+	--forcepassiveip $PUBLIC_IP \
+	--createhomedir \
+	--noanonymous \
+	--nochmod
 
 EXPOSE 21 38801-38864
