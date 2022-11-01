@@ -26,7 +26,7 @@ fi
 
 if [ -s "$DB_FILE" ] && [[ "$PURE_FTPD_FLAGS" != *"--login=puredb:"* ]] && [[ "$PURE_FTPD_FLAGS" != *" -l puredb:"* ]]
 then
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --login=puredb:\"$DB_FILE\""
+    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --login=puredb:$DB_FILE"
 fi
 
 # detect if using TLS (from volumed in file) but no flag set, set one
