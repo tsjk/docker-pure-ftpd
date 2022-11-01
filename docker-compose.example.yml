@@ -21,18 +21,18 @@ services:
 # E.g PURE_FTPD_PASSIVE_PORT_RANGE=n-m in .env
       - "${PURE_FTPD_PASSIVE_PORT_RANGE}:${PURE_FTPD_PASSIVE_PORT_RANGE}"
     volumes:
-# Uncomment for a pre-existing passwd file
+# Uncomment for a pre-existing passwd file - should contain pureftpd.passwd
 #      - type: bind
 #        source: conf/passwd
 #        target: /etc/pure-ftpd/passwd
-# Uncomment for a pre-existing puredb file
+# Uncomment for a pre-existing puredb file (overrides passwd file) -- should contain pureftpd.pdb
 #      - type: bind
 #        source: conf/puredb
 #        target: /etc/pure-ftpd/puredb
-# Uncomment for a pre-existing certificate file and add e.g. '--certfile=/etc/pure-ftpd/ssl/pure-ftpd.pem' to PURE_FTPD_CUSTOM_FLAGS in .env
+# Uncomment for pre-existing certificate file(s) - should contain pure-ftpd.pem
 #      - type: bind
 #        source: conf/ssl
-#        target: /etc/pure-ftp/ssl
+#        target: /etc/ssl/private
 
 # Additional volumes
 #      - /folder_on_disk/data:/home/ftp:rw

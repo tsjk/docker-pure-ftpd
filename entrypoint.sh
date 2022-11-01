@@ -30,35 +30,47 @@ then
 fi
 
 # detect if using TLS (from volumed in file) but no flag set, set one
-if [ -e /etc/ssl/private/pure-ftpd.pem ] && [[ "$PURE_FTPD_FLAGS" != *"--tls="* ]] && [[ "$PURE_FTPD_FLAGS" != *"-Y "* ]]
+if [ -e /etc/private/ssl/pure-ftpd.pem ]
 then
-    echo "TLS Enabled"
-    PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --tls=1"
+    echo "Found cerificate at \"/etc/private/ssl/pure-ftpd.pem\""
+   if [[ "$PURE_FTPD_FLAGS" != *"--tls="* ]] && [[ "$PURE_FTPD_FLAGS" != *"-Y "* ]]
+   then
+       echo "\"--tls=1\" flag added"
+       PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --tls=1"
+   fi
 fi
 
 # If TLS flag is set and cert and key are given are given as two files, merge them into one cert
-if [ -e /etc/ssl/private/pure-ftpd-cert.pem ] && [ -e /etc/ssl/private/pure-ftpd-key.pem ] && [[ "$PURE_FTPD_FLAGS" == *"--tls="* || "$PURE_FTPD_FLAGS" != *"-Y "* ]]
+if [ -e /etc/private/ssl/pure-ftpd.crt ] && [ -e /etc/private/ssl/pure-ftpd.key ] && \
+   [[ "$PURE_FTPD_FLAGS" == *"--tls="* || "$PURE_FTPD_FLAGS" != *"-Y "* ]]
 then
-    echo "Merging certificate and key"
-    cat /etc/ssl/private/pure-ftpd-cert.pem /etc/ssl/private/pure-ftpd-key.pem > /etc/ssl/private/pure-ftpd.pem
+    echo "Found separate cerificate and key - merging"
+    cat /etc/private/ssl/pure-ftpd.crt /etc/private/ssl/pure-ftpd.key > /etc/private/ssl/pure-ftpd.pem
+   if [[ "$PURE_FTPD_FLAGS" != *"--tls="* ]] && [[ "$PURE_FTPD_FLAGS" != *"-Y "* ]]
+   then
+       echo "\"--tls=1\" flag added"
+       PURE_FTPD_FLAGS="$PURE_FTPD_FLAGS --tls=1"
+   fi
 fi
 
 # If TLS flag is set and no certificate exists, generate it
-if [ ! -e /etc/ssl/private/pure-ftpd.pem ] && [[ "$PURE_FTPD_FLAGS" == *"--tls="* || "$PURE_FTPD_FLAGS" != *"-Y "* ]] && \
+if [ ! -e /etc/private/ssl/pure-ftpd.pem ] && [[ "$PURE_FTPD_FLAGS" == *"--tls="* || "$PURE_FTPD_FLAGS" != *"-Y "* ]] && \
    [ ! -z "$TLS_CN" ] && [ ! -z "$TLS_ORG" ] && [ ! -z "$TLS_C" ]
 then
     echo "Generating self-signed certificate"
-    mkdir -p /etc/ssl/private
-    if [[ "$TLS_USE_DSAPRAM" == "true" ]]; then
-        openssl dhparam -dsaparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048
-    else
-        openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048
-    fi
-    openssl req -subj "/CN=${TLS_CN}/O=${TLS_ORG}/C=${TLS_C}" -days 1826 \
-        -x509 -nodes -newkey rsa:2048 -sha256 -keyout \
-        /etc/ssl/private/pure-ftpd.pem \
-        -out /etc/ssl/private/pure-ftpd.pem
-    chmod 600 /etc/ssl/private/*.pem
+    mkdir -p /etc/private/ssl && {\
+        if [[ "$TLS_USE_DSAPRAM" == "true" ]]; then
+            openssl dhparam -dsaparam -out /etc/private/ssl/pure-ftpd-dhparams.pem 2048
+        else
+            openssl dhparam -out /etc/private/ssl/pure-ftpd-dhparams.pem 2048
+        fi; } &&\
+        openssl req -subj "/CN=${TLS_CN}/O=${TLS_ORG}/C=${TLS_C}" -days 1826\
+            -x509 -nodes -newkey rsa:2048 -sha256 -keyout\
+            /etc/private/ssl/pure-ftpd.pem\
+            -out /etc/private/ssl/pure-ftpd.pem &&\
+        cat /etc/private/ssl/pure-ftpd-dhparams.pem >> /etc/private/ssl/pure-ftpd.pem &&\
+        rm /etc/private/ssl/pure-ftpd-dhparams.pem &&\
+        chmod 600 /etc/private/ssl/*.pem || exit 1
 fi
 
 # Add user
