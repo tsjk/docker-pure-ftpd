@@ -99,4 +99,4 @@ EXPOSE 21 38801-38864
 VOLUME ["/home/ftp", "/etc/pure-ftpd/passwd", "/etc/pure-ftpd/puredb"]
 
 # execution of entrypoint
-CMD ["/entrypoint.sh", "--createhomedir", "--noanonymous", "--nochmod", "--forcepassiveip=$PURE_FTPD_PASSIVE_IP"]
+CMD ["/bin/sh", "-c", "exec /entrypoint.sh --createhomedir --noanonymous --nochmod --forcepassiveip=${PURE_FTPD_PASSIVE_IP}"]
