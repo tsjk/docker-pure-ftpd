@@ -1,16 +1,16 @@
 #stage 1 : builder debian image
-FROM debian:bullseye as builder
+FROM debian:bookworm as builder
 
 # Set DEBIAN_FRONTEND to 'noninteractive'
 ENV DEBIAN_FRONTEND noninteractive
 
 # properly setup debian sources
-RUN echo "deb http://http.debian.net/debian bullseye main\n\
-deb-src http://http.debian.net/debian bullseye main\n\
-deb http://http.debian.net/debian bullseye-updates main\n\
-deb-src http://http.debian.net/debian bullseye-updates main\n\
-deb http://deb.debian.org/debian-security bullseye-security main\n\
-deb-src http://deb.debian.org/debian-security bullseye-security main\n\
+RUN echo "deb http://http.debian.net/debian bookworm main\n\
+deb-src http://http.debian.net/debian bookworm main\n\
+deb http://http.debian.net/debian bookworm-updates main\n\
+deb-src http://http.debian.net/debian bookworm-updates main\n\
+deb http://deb.debian.org/debian-security bookworm-security main\n\
+deb-src http://deb.debian.org/debian-security bookworm-security main\n\
 " > /etc/apt/sources.list && \
 # install package building helpers
 # rsyslog for logging (ref https://github.com/stilliard/docker-pure-ftpd/issues/17)
@@ -36,7 +36,7 @@ RUN mkdir /tmp/pure-ftpd &&\
 
 
 #stage 2 : pure-ftpd image
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 LABEL maintainer "Tamas Jantvik <tsjk@hotmaill.com>"
 
@@ -48,10 +48,11 @@ RUN apt-get -y update && apt-get -y install apt-utils && apt-get -y dist-upgrade
 	apt-get --no-install-recommends --yes install\
 	libc6\
 	libcap2\
+	libcrypt1\
 	libmariadb3\
 	libpam0g\
 	libsodium23\
-	libssl1.1\
+	libssl3\
 	lsb-base\
 	openbsd-inetd\
 	openssl\
