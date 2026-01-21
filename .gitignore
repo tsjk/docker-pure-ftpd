@@ -1,4 +1,5 @@
 *.swp
 /.env
+/_*
 /docker-compose.yml
 /conf/

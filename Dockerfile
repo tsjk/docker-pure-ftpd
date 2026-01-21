@@ -1,17 +1,14 @@
 #stage 1 : builder debian image
-FROM debian:bookworm as builder
+FROM debian:trixie as builder
 
 # Set DEBIAN_FRONTEND to 'noninteractive'
 ENV DEBIAN_FRONTEND noninteractive
 
-# properly setup debian sources
-RUN echo "deb http://http.debian.net/debian bookworm main\n\
-deb-src http://http.debian.net/debian bookworm main\n\
-deb http://http.debian.net/debian bookworm-updates main\n\
-deb-src http://http.debian.net/debian bookworm-updates main\n\
-deb http://deb.debian.org/debian-security bookworm-security main\n\
-deb-src http://deb.debian.org/debian-security bookworm-security main\n\
-" > /etc/apt/sources.list && \
+# setup debian sources
+RUN echo "deb-src http://http.debian.net/debian trixie main\n\
+deb-src http://http.debian.net/debian trixie-updates main\n\
+deb-src http://deb.debian.org/debian-security trixie-security main\n\
+" >> /etc/apt/sources.list && \
 # install package building helpers
 # rsyslog for logging (ref https://github.com/stilliard/docker-pure-ftpd/issues/17)
 	apt-get -y update && apt-get -y install apt-utils && apt-get -y dist-upgrade &&\
@@ -36,7 +33,7 @@ RUN mkdir /tmp/pure-ftpd &&\
 
 
 #stage 2 : pure-ftpd image
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 LABEL maintainer "Tamas Jantvik <tsjk@hotmaill.com>"
 
